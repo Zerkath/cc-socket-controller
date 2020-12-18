@@ -29,5 +29,3 @@ async () => {
   const url = await connect(5000);
   console.log(url);
 };
-
-// console.log("Started WebSocket on " + port);
