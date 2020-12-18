@@ -14,9 +14,13 @@ const rl = readline.createInterface({
 interface Turtle {}
 
 wss.on("connection", (ws) => {
+  let name = "Not given yet ";
   console.log("Something connected to socket");
   ws.on("message", (message: string) => {
-    console.log("Turtle: " + message);
+    if (message.split(" ")[0] == "name") {
+      name = message.split(" ")[1] + " ";
+    }
+    console.log(name + message);
     if (message == "waiting") {
       rl.question("Next: ", (answer: string) => {
         ws.send(answer);
@@ -24,7 +28,6 @@ wss.on("connection", (ws) => {
     }
   });
 });
-
 async () => {
   const url = await connect(5000);
   console.log(url);

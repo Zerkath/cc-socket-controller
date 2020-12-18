@@ -1,11 +1,12 @@
 local ws, err = http.websocket("ws://localhost:5000")
-
+local name = os.getComputerLabel()
 if err then
     print(err)
 end
 
 if ws then
     print("> connected")
+    ws.send("name " .. name)
     while true do
         ws.send("fuel_level " .. turtle.getFuelLevel())
         ws.send("waiting")
