@@ -1,44 +1,65 @@
 local ws, err = http.websocket("ws://localhost:5000")
-local name = os.getComputerLabel()
+local label = os.getComputerLabel()
 if err then
     print(err)
 end
 
+function GetStringArr(string)
+    local arr = {}
+    local i = 0
+    for str in string.gmatch(string, "%S+") do
+        arr[i] = str
+        i = i + 1
+    end
+    return arr
+end
+
+function Move(direction)
+    if direction == "forward" then
+        turtle.forward()
+    elseif direction == "back" then
+        turtle.back()
+    elseif direction == "left" then
+        turtle.turnLeft()
+    elseif direction == "right" then
+        turtle.turnRight()
+    elseif direction == "up" then
+        turtle.up()
+    elseif direction == "down" then
+        turtle.down()
+    end
+end
+
+function Dig(direction)
+    if direction == "forward" then
+        turtle.dig()
+    elseif direction == "down" then
+        turtle.digDown()
+    elseif direction == "up" then
+        turtle.digUp()
+    end
+end
+
 if ws then
     print("> connected")
-    ws.send("name " .. name)
+    ws.send("label " .. label)
     while true do
-        ws.send("fuel_level " .. turtle.getFuelLevel())
-        ws.send("waiting")
         local response = ws.receive()
-        if response == "go" then
-            local success, data = turtle.inspect()
-            if(data.name ~= "minecraft:air") then
-                turtle.dig()
+        if response then
+            --is an array where index 0 points to possible action
+            local splitAction = GetStringArr(response)
+            if(splitAction[0] == "move") then
+                Move(splitAction[1])
+            elseif(splitAction[0] == "dig") then
+                Dig(splitAction[1])
+            elseif(splitAction[0] == "fuel") then
+                ws.emit("fuel " .. turtle.getFuelLevel())
             end
-            turtle.forward()
-        elseif(response == "back") then
-            turtle.back()
-        elseif(response == "left") then
-            turtle.turnLeft()
-        elseif(response == "right") then
-            turtle.turnRight()
-        elseif(response == "up") then
-            local success, data = turtle.inspectUp()
-            if(data.name ~= "minecraft:air") then
-                turtle.digUp()
-            end
-            turtle.up()
-        elseif(response == "down") then
-            local success, data = turtle.inspectDown()
-            if(data.name ~= "minecraft:air") then
-                turtle.digDown()
-            end
-            turtle.down()
-        elseif(response == "dig") then
-            turtle.dig()
-            turtle.digUp()
-            turtle.digDown()
         end
     end
 end
+--
+-- local success, data = turtle.inspect()
+-- if(data.name ~= "minecraft:air") then
+--     turtle.dig()
+-- end

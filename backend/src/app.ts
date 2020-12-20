@@ -1,6 +1,8 @@
 import { Server } from "ws";
-import { connect } from "ngrok";
+import { Turtle } from "./turtle";
+import { dig, move } from "./turtle_actions";
 import readline from "readline";
+import Queue from "p-queue";
 
 const port = 5000;
 
@@ -11,24 +13,16 @@ const rl = readline.createInterface({
   output: process.stdout,
 });
 
-interface Turtle {}
+// const turtleQueue = new Queue({ concurrency: 1 });
 
 wss.on("connection", (ws) => {
-  let name = "Not given yet ";
-  console.log("Something connected to socket");
+  console.log("turtle connected");
+
+  let turtle = new Turtle(ws, "default");
   ws.on("message", (message: string) => {
-    if (message.split(" ")[0] == "name") {
-      name = message.split(" ")[1] + " ";
-    }
-    console.log(name + message);
-    if (message == "waiting") {
-      rl.question("Next: ", (answer: string) => {
-        ws.send(answer);
-      });
+    if (message.split(" ")[0] == "label") {
+      let label = message.split(" ")[1];
+      turtle.setLabel(label);
     }
   });
 });
-async () => {
-  const url = await connect(5000);
-  console.log(url);
-};
