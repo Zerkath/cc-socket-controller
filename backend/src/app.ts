@@ -2,7 +2,7 @@ import { Server } from "ws";
 import { Turtle } from "./turtle";
 import { dig, move, tunnel } from "./turtle_actions";
 import readline from "readline";
-import Queue from "p-queue";
+// import Queue from "p-queue";
 
 const port = 5000;
 
