@@ -44,6 +44,7 @@ end
 if ws then
     print("> connected")
     while true do
+        ws.send("waiting")
         local response = ws.receive()
         if response then
             local actions = GetStringArr(response)

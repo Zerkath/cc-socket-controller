@@ -1,11 +1,14 @@
 import WebSocket from "ws";
 import { EventEmitter } from "events";
-import { action, move, dig } from "./turtle_actions";
+import { move, dig, tunnel } from "./turtle_actions";
 
 export class Turtle extends EventEmitter {
   ws: WebSocket;
   fuelLevel = 0;
   label: string;
+  x = 0;
+  y = 0;
+  z = 0;
   constructor(ws: WebSocket, label: string) {
     super();
     this.ws = ws;
@@ -16,6 +19,9 @@ export class Turtle extends EventEmitter {
   }
   public dig(dig: dig): void {
     this.ws.send(dig);
+  }
+  public tunnel(tunnel: tunnel): void {
+    this.ws.send(tunnel);
   }
   public setLabel(label: string): void {
     this.label = label;
