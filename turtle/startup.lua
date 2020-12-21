@@ -1,7 +1,8 @@
-local ws, err = http.websocket("ws://localhost:5000")
 local label = os.getComputerLabel()
+local ws, err = http.websocket("ws://localhost:5000/".. label)
 if err then
     print(err)
+    exit()
 end
 
 function GetStringArr(string)
@@ -42,11 +43,9 @@ end
 
 if ws then
     print("> connected")
-    ws.send("label " .. label)
     while true do
         local response = ws.receive()
         if response then
-            --is an array where index 0 points to possible action
             local actions = GetStringArr(response)
             local header = actions[0]
             if(header == "move") then
@@ -54,7 +53,7 @@ if ws then
             elseif(header == "dig") then
                 Dig(actions[1])
             elseif(header == "fuel") then
-                ws.emit("fuel " .. turtle.getFuelLevel())
+                ws.send("fuel " .. turtle.getFuelLevel())
             elseif(header == "tunnel") then
                 Dig(actions[1])
                 Move(actions[1])
