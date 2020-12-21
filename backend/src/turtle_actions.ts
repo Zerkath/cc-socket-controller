@@ -19,12 +19,4 @@ export enum tunnel {
   down = "tunnel down",
 }
 
-export enum action {
-  move = "move ",
-  dig = "dig ",
-  tunnel = "tunnel ",
-  place = "place ",
-  craft = "craft ",
-  inspect = "inspect ",
-}
 //todo make this actually nice
