@@ -15,7 +15,7 @@ export class Turtle extends EventEmitter {
     this.label = label;
   }
   public do(action: move | dig | tunnel, actionCount?: number): void {
-    if (actionCount === null) {
+    if (actionCount === undefined) {
       actionCount = 1;
     }
     this.ws.send(action + actionCount);
