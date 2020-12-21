@@ -14,14 +14,11 @@ export class Turtle extends EventEmitter {
     this.ws = ws;
     this.label = label;
   }
-  public move(move: move): void {
-    this.ws.send(move);
-  }
-  public dig(dig: dig): void {
-    this.ws.send(dig);
-  }
-  public tunnel(tunnel: tunnel): void {
-    this.ws.send(tunnel);
+  public do(action: move | dig | tunnel, actionCount?: number): void {
+    if (actionCount === null) {
+      actionCount = 1;
+    }
+    this.ws.send(action + actionCount);
   }
   public setLabel(label: string): void {
     this.label = label;

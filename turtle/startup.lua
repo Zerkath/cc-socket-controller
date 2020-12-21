@@ -50,14 +50,20 @@ if ws then
             local actions = GetStringArr(response)
             local header = actions[0]
             if(header == "move") then
-                Move(actions[1])
+                for i = 1, tonumber(actions[2]) do
+                    Move(actions[1])
+                end
             elseif(header == "dig") then
-                Dig(actions[1])
+                for i = 1, tonumber(actions[2]) do
+                    Dig(actions[1])
+                end
             elseif(header == "fuel") then
                 ws.send("fuel " .. turtle.getFuelLevel())
             elseif(header == "tunnel") then
-                Dig(actions[1])
-                Move(actions[1])
+                for i = 1, tonumber(actions[2]) do
+                    Dig(actions[1])
+                    Move(actions[1])
+                end
             end
         end
     end
