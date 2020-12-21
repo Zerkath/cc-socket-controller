@@ -47,13 +47,17 @@ if ws then
         local response = ws.receive()
         if response then
             --is an array where index 0 points to possible action
-            local splitAction = GetStringArr(response)
-            if(splitAction[0] == "move") then
-                Move(splitAction[1])
-            elseif(splitAction[0] == "dig") then
-                Dig(splitAction[1])
-            elseif(splitAction[0] == "fuel") then
+            local actions = GetStringArr(response)
+            local header = actions[0]
+            if(header == "move") then
+                Move(actions[1])
+            elseif(header == "dig") then
+                Dig(actions[1])
+            elseif(header == "fuel") then
                 ws.emit("fuel " .. turtle.getFuelLevel())
+            elseif(header == "tunnel") then
+                Dig(actions[1])
+                Move(actions[1])
             end
         end
     end
