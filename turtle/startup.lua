@@ -1,4 +1,7 @@
+local json = require "json" --external dependancy https://github.com/rxi/json.lua
 local label = os.getComputerLabel()
+local x, y, z
+local heading
 local ws, err = http.websocket("ws://localhost:5000/".. label)
 if err then
     print(err)
@@ -13,6 +16,19 @@ function GetStringArr(string)
         i = i + 1
     end
     return arr
+end
+
+function GetAllItemSlots()
+    local items = {}
+    for slot = 1, 16 do
+        local item = turtle.getItemDetail(slot)
+        if not item then
+            item = {}
+        end
+        item["index"] = slot-1
+        items[slot] = item
+    end
+    ws.send("items " .. json.encode(items))
 end
 
 function Move(direction)
@@ -64,6 +80,8 @@ if ws then
                     Dig(actions[1])
                     Move(actions[1])
                 end
+            elseif(header == "items") then
+                GetAllItemSlots()
             end
         end
     end

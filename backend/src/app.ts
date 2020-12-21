@@ -20,7 +20,7 @@ wss.on("connection", (ws, request) => {
   ws.on("message", (message: string) => {
     if (message === "waiting") {
       rl.question(
-        turtle.label + " is waiting for action (dig, tunnel, move): ",
+        turtle.label + " is waiting for action (dig, tunnel, move, items): ",
         (action) => {
           console.log("action: " + action);
           action = action.toLowerCase();
@@ -30,7 +30,7 @@ wss.on("connection", (ws, request) => {
               direction = dir.toLowerCase();
               turtleAction(action, direction, turtle);
             });
-          } else {
+          } else if (action === "move") {
             rl.question(
               "direction (forward, back, up, down, left, right): ",
               (dir) => {
@@ -38,6 +38,8 @@ wss.on("connection", (ws, request) => {
                 turtleAction(action, direction, turtle);
               }
             );
+          } else {
+            turtle.getItems();
           }
         }
       );

@@ -19,9 +19,11 @@ export class Turtle extends EventEmitter {
   private turtleListener(): void {
     this.ws.on("message", (data: string) => {
       const items = data.split(" ");
-      if (items[0] == "fuel") {
+      if (items[0] === "fuel") {
         this.fuelLevel = parseInt(items[1]);
         console.log(this.fuelLevel);
+      } else if (items[0] === "items") {
+        console.log(items[1]);
       }
     });
   }
@@ -39,5 +41,9 @@ export class Turtle extends EventEmitter {
 
   public getFuelLevel(): void {
     this.ws.send("fuel");
+  }
+
+  public getItems(): void {
+    this.ws.send("items");
   }
 }
