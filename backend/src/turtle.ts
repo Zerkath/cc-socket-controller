@@ -13,24 +13,31 @@ export class Turtle extends EventEmitter {
     super();
     this.ws = ws;
     this.label = label;
+    this.turtleListener();
   }
+
+  private turtleListener(): void {
+    this.ws.on("message", (data: string) => {
+      const items = data.split(" ");
+      if (items[0] == "fuel") {
+        this.fuelLevel = parseInt(items[1]);
+        console.log(this.fuelLevel);
+      }
+    });
+  }
+
   public do(action: move | dig | tunnel, actionCount?: number): void {
     if (actionCount === undefined) {
       actionCount = 1;
     }
     this.ws.send(action + actionCount);
   }
+
   public setLabel(label: string): void {
     this.label = label;
   }
 
   public getFuelLevel(): void {
     this.ws.send("fuel");
-    this.ws.on("message", (data: string) => {
-      if (data.split(" ")[0] == "fuel") {
-        this.fuelLevel = parseInt(data.split(" ")[1]);
-        console.log(this.fuelLevel);
-      }
-    });
   }
 }
