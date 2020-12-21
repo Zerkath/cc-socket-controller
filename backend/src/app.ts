@@ -60,7 +60,7 @@ const turtleAction = (action: string, direction: string, turtle: Turtle) => {
     } else if (direction === "right") {
       turtle.do(move.right);
     } else {
-      turtle.getFuelLevel;
+      turtle.getFuelLevel();
     }
   } else if (action === "dig" || action === "tunnel") {
     if (direction === "forward") {
@@ -70,7 +70,7 @@ const turtleAction = (action: string, direction: string, turtle: Turtle) => {
     } else if (direction === "down") {
       action === "dig" ? turtle.do(dig.down) : turtle.do(tunnel.down);
     } else {
-      turtle.getFuelLevel;
+      turtle.getFuelLevel();
     }
   } else {
     turtle.getFuelLevel();
