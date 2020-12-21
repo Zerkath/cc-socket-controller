@@ -4,24 +4,24 @@ import { action, move, dig } from "./turtle_actions";
 
 export class Turtle extends EventEmitter {
   ws: WebSocket;
-  fuelLevel: number = 0;
-  label: string = "unnamed";
+  fuelLevel = 0;
+  label: string;
   constructor(ws: WebSocket, label: string) {
     super();
     this.ws = ws;
     this.label = label;
   }
-  public move(move: move) {
+  public move(move: move): void {
     this.ws.send(move);
   }
-  public dig(dig: dig) {
+  public dig(dig: dig): void {
     this.ws.send(dig);
   }
-  public setLabel(label: string) {
+  public setLabel(label: string): void {
     this.label = label;
   }
 
-  public getFuel() {
+  public getFuelLevel(): void {
     this.ws.send("fuel");
     this.ws.on("message", (data: string) => {
       if (data.split(" ")[0] == "fuel") {

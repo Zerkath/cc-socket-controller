@@ -13,16 +13,12 @@ const rl = readline.createInterface({
   output: process.stdout,
 });
 
-// const turtleQueue = new Queue({ concurrency: 1 });
-
-wss.on("connection", (ws) => {
-  console.log("turtle connected");
-
-  let turtle = new Turtle(ws, "default");
+wss.on("connection", (ws, request) => {
+  const label = request.url?.slice(1);
+  console.log(label + " connected");
+  const turtle = new Turtle(ws, String(label));
+  turtle.getFuelLevel();
   ws.on("message", (message: string) => {
-    if (message.split(" ")[0] == "label") {
-      let label = message.split(" ")[1];
-      turtle.setLabel(label);
-    }
+    console.log(message);
   });
 });
