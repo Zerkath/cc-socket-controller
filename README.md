@@ -12,4 +12,4 @@ https://www.curseforge.com/minecraft/mc-mods/cc-tweaked
 The API for the mod is listed here:
 https://tweaked.cc/
 
-Maybe depency for the future https://github.com/rxi/json.lua
+Currently using https://github.com/rxi/json.lua to encode and encode.
