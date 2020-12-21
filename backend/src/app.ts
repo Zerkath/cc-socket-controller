@@ -28,14 +28,14 @@ wss.on("connection", (ws, request) => {
           if (action === "dig" || action === "tunnel") {
             rl.question("direction (forward, up, down): ", (dir) => {
               direction = dir.toLowerCase();
-              cbt(action, direction, turtle);
+              turtleAction(action, direction, turtle);
             });
           } else {
             rl.question(
               "direction (forward, back, up, down, left, right): ",
               (dir) => {
                 direction = dir.toLowerCase();
-                cbt(action, direction, turtle);
+                turtleAction(action, direction, turtle);
               }
             );
           }
@@ -45,33 +45,30 @@ wss.on("connection", (ws, request) => {
   });
 });
 
-const cbt = (action: string, direction: string, turtle: Turtle) => {
-  console.log("direction: " + direction);
+const turtleAction = (action: string, direction: string, turtle: Turtle) => {
   if (action === "move") {
     if (direction === "forward") {
-      turtle.move(move.forward);
+      turtle.do(move.forward);
     } else if (direction === "up") {
-      turtle.move(move.up);
+      turtle.do(move.up);
     } else if (direction === "down") {
-      turtle.move(move.down);
+      turtle.do(move.down);
     } else if (direction === "back") {
-      turtle.move(move.back);
+      turtle.do(move.back);
     } else if (direction === "left") {
-      turtle.move(move.left);
+      turtle.do(move.left);
     } else if (direction === "right") {
-      turtle.move(move.right);
+      turtle.do(move.right);
     } else {
       turtle.getFuelLevel;
     }
   } else if (action === "dig" || action === "tunnel") {
     if (direction === "forward") {
-      action === "dig"
-        ? turtle.dig(dig.forward)
-        : turtle.tunnel(tunnel.forward);
+      action === "dig" ? turtle.do(dig.forward) : turtle.do(tunnel.forward);
     } else if (direction === "up") {
-      action === "dig" ? turtle.dig(dig.up) : turtle.tunnel(tunnel.up);
+      action === "dig" ? turtle.do(dig.up) : turtle.do(tunnel.up);
     } else if (direction === "down") {
-      action === "dig" ? turtle.dig(dig.down) : turtle.tunnel(tunnel.down);
+      action === "dig" ? turtle.do(dig.down) : turtle.do(tunnel.down);
     } else {
       turtle.getFuelLevel;
     }
