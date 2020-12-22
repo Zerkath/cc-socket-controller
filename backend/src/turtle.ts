@@ -24,6 +24,8 @@ export class Turtle extends EventEmitter {
         console.log(this.fuelLevel);
       } else if (items[0] === "items") {
         console.log(items[1]);
+      } else if (items[0] === "position") {
+        console.log(items[1]);
       }
     });
   }
