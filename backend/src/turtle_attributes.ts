@@ -19,4 +19,10 @@ export enum tunnel {
   down = "tunnel down ",
 }
 
+export interface InventoryCell {
+  count?: number;
+  name?: string;
+  damage?: number;
+}
+
 //todo make this actually nice
