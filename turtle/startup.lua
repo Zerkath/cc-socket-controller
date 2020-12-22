@@ -46,9 +46,10 @@ local function getAllItemSlots()
     for slot = 1, 16 do
         local item = turtle.getItemDetail(slot)
         if not item then
-            item = {}
+            item = {count = 0, "minecraft:air"}
+        else 
+            table.remove(item, "damage")
         end
-        item["index"] = slot-1
         items[slot] = item
     end
     ws.send("items " .. json.encode(items))

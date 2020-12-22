@@ -1,6 +1,6 @@
 import { Server } from "ws";
 import { Turtle } from "./turtle";
-import { dig, move, tunnel } from "./turtle_actions";
+import { dig, move, tunnel } from "./turtle_attributes";
 import readline from "readline";
 // import Queue from "p-queue";
 

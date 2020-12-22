@@ -1,14 +1,19 @@
 import WebSocket from "ws";
 import { EventEmitter } from "events";
-import { move, dig, tunnel } from "./turtle_actions";
+import { move, dig, tunnel, InventoryCell } from "./turtle_attributes";
 
 export class Turtle extends EventEmitter {
   ws: WebSocket;
   fuelLevel = 0;
   label: string;
-  x = 0;
-  y = 0;
-  z = 0;
+  position = {
+    x: 0,
+    y: 0,
+    z: 0,
+    heading: "",
+  };
+  inventory: InventoryCell[] = [];
+
   constructor(ws: WebSocket, label: string) {
     super();
     this.ws = ws;
@@ -23,9 +28,10 @@ export class Turtle extends EventEmitter {
         this.fuelLevel = parseInt(items[1]);
         console.log(this.fuelLevel);
       } else if (items[0] === "items") {
-        console.log(items[1]);
+        this.inventory = JSON.parse(items[1]);
+        console.log(this.inventory);
       } else if (items[0] === "position") {
-        console.log(items[1]);
+        this.position = JSON.parse(items[1]);
       }
     });
   }
