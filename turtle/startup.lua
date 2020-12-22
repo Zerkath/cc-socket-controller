@@ -1,6 +1,6 @@
 local json = require "json" --external dependancy https://github.com/rxi/json.lua
 local label = os.getComputerLabel()
-local coords = {
+local position = {
     x = 0,
     y = 0,
     z = 0,
@@ -20,15 +20,15 @@ local function readNumber()
     return r
 end
 
-local function getCoordsFromUser()
+local function getpositionFromUser()
     print("x")
-    coords["x"] = readNumber()
+    position["x"] = readNumber()
     print("y")
-    coords["y"] = readNumber()
+    position["y"] = readNumber()
     print("z")
-    coords["z"] = readNumber()
+    position["z"] = readNumber()
     print("Heading (north, west, east, south)")
-    coords["heading"] = readLine()
+    position["heading"] = readLine()
 end
 
 local function getStringArr(string)
@@ -56,17 +56,17 @@ end
 
 -- todo clean this method up
 local function Move(direction)
-    local heading = coords["heading"]
+    local heading = position["heading"]
     if direction == "forward" then
         if turtle.forward() then
             if heading == "north" then
-                coords["z"] = coords["z"] - 1
+                position["z"] = position["z"] - 1
             elseif heading == "east" then
-                coords["x"] = coords["x"] + 1
+                position["x"] = position["x"] + 1
             elseif heading == "south" then
-                coords["z"] = coords["z"] + 1
+                position["z"] = position["z"] + 1
             elseif heading == "west" then
-                coords["x"] = coords["x"] - 1
+                position["x"] = position["x"] - 1
             else
                 turtle.back() --invalid direction lets go back
             end
@@ -74,13 +74,13 @@ local function Move(direction)
     elseif direction == "back" then
         if turtle.back() then
             if heading == "north" then
-                coords["z"] = coords["z"] + 1
+                position["z"] = position["z"] + 1
             elseif heading == "east" then
-                coords["x"] = coords["x"] - 1
+                position["x"] = position["x"] - 1
             elseif heading == "south" then
-                coords["z"] = coords["z"] - 1
+                position["z"] = position["z"] - 1
             elseif heading == "west" then
-                coords["x"] = coords["x"] + 1
+                position["x"] = position["x"] + 1
             else
                 turtle.forward() --invalid direction lets go back
             end
@@ -88,37 +88,37 @@ local function Move(direction)
     elseif direction == "left" then
         if turtle.turnLeft() then
             if heading == "north" then
-                coords["heading"] = "west"
+                position["heading"] = "west"
             elseif heading == "west" then
-                coords["heading"] = "south"
+                position["heading"] = "south"
             elseif heading == "south" then
-                coords["heading"] = "east"
+                position["heading"] = "east"
             elseif heading == "east" then
-                coords["heading"] = "north"
+                position["heading"] = "north"
             end
         end
     elseif direction == "right" then
         if turtle.turnRight() then
             if heading == "north" then
-                coords["heading"] = "west"
-            elseif heading == "west" then
-                coords["heading"] = "south"
-            elseif heading == "south" then
-                coords["heading"] = "east"
+                position["heading"] = "east"
             elseif heading == "east" then
-                coords["heading"] = "north"
+                position["heading"] = "south"
+            elseif heading == "south" then
+                position["heading"] = "west"
+            elseif heading == "west" then
+                position["heading"] = "north"
             end
         end
     elseif direction == "up" then
         if turtle.up() then
-            coords["y"] = coords["y"] + 1
+            position["y"] = position["y"] + 1
         end
     elseif direction == "down" then
         if turtle.down() then
-            coords["y"] = coords["y"] - 1
+            position["y"] = position["y"] - 1
         end
     end
-    ws.send("position " .. json.encode(coords))
+    ws.send("position " .. json.encode(position))
 end
 
 local function Dig(direction) --doesnt move the turtle
@@ -133,7 +133,8 @@ end
 
 if ws then
     print("> connected")
-    getCoordsFromUser()
+    getpositionFromUser()
+    ws.send("position " .. json.encode(position))
     while true do
         ws.send("waiting")
         local response = ws.receive()
