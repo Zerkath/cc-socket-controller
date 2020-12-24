@@ -22,7 +22,6 @@ wss.on("connection", (ws, request) => {
       rl.question(
         turtle.label + " is waiting for action (dig, tunnel, move, items): ",
         (action) => {
-          console.log("action: " + action);
           action = action.toLowerCase();
           let direction = "";
           if (action === "dig" || action === "tunnel") {
@@ -48,33 +47,41 @@ wss.on("connection", (ws, request) => {
 });
 
 const turtleAction = (action: string, direction: string, turtle: Turtle) => {
+  let nextAction: move | dig | tunnel;
+  const actionPicked =
+    action === "move" || action === "dig" || action === "tunnel";
   if (action === "move") {
     if (direction === "forward") {
-      turtle.do(move.forward);
+      nextAction = move.forward;
     } else if (direction === "up") {
-      turtle.do(move.up);
+      nextAction = move.up;
     } else if (direction === "down") {
-      turtle.do(move.down);
+      nextAction = move.down;
     } else if (direction === "back") {
-      turtle.do(move.back);
+      nextAction = move.back;
     } else if (direction === "left") {
-      turtle.do(move.left);
+      nextAction = move.left;
     } else if (direction === "right") {
-      turtle.do(move.right);
+      nextAction = move.right;
     } else {
       turtle.getFuelLevel();
     }
   } else if (action === "dig" || action === "tunnel") {
     if (direction === "forward") {
-      action === "dig" ? turtle.do(dig.forward) : turtle.do(tunnel.forward);
+      nextAction = action === "dig" ? dig.forward : tunnel.forward;
     } else if (direction === "up") {
-      action === "dig" ? turtle.do(dig.up) : turtle.do(tunnel.up);
+      nextAction = action === "dig" ? dig.up : tunnel.up;
     } else if (direction === "down") {
-      action === "dig" ? turtle.do(dig.down) : turtle.do(tunnel.down);
+      nextAction = action === "dig" ? dig.down : tunnel.down;
     } else {
       turtle.getFuelLevel();
     }
   } else {
     turtle.getFuelLevel();
+  }
+  if (actionPicked) {
+    rl.question("How many times?", (answer: string) => {
+      turtle.do(nextAction, Number(answer));
+    });
   }
 };

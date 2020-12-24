@@ -32,6 +32,7 @@ export class Turtle extends EventEmitter {
         console.log(this.inventory);
       } else if (items[0] === "position") {
         this.position = JSON.parse(items[1]);
+        this.printCoords();
       }
     });
   }
@@ -53,5 +54,9 @@ export class Turtle extends EventEmitter {
 
   public getItems(): void {
     this.ws.send("items");
+  }
+
+  public printCoords(): void {
+    console.log(this.position);
   }
 }
