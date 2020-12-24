@@ -46,9 +46,9 @@ local function getAllItemSlots()
     for slot = 1, 16 do
         local item = turtle.getItemDetail(slot)
         if not item then
-            item = {count = 0, "minecraft:air"}
-        else 
-            table.remove(item, "damage")
+            item = {count = 0, name = "minecraft:air"}
+        else
+            item["damage"] = nil
         end
         items[slot] = item
     end
