@@ -37,8 +37,10 @@ wss.on("connection", (ws, request) => {
                 turtleAction(action, direction, turtle);
               }
             );
-          } else {
+          } else if (action === "items") {
             turtle.getItems();
+          } else {
+            turtle.experimental();
           }
         }
       );

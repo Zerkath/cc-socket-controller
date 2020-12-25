@@ -6,6 +6,16 @@ local position = {
     z = 0,
     heading = "north"
 }
+local function getStringArr(string)
+    local arr = {}
+    local i = 0
+    for str in string.gmatch(string, "%S+") do
+        arr[i] = str
+        i = i + 1
+    end
+    return arr
+end
+
 local ws, err = http.websocket("ws://localhost:5000/".. label)
 if err then
     print(err)
@@ -15,30 +25,21 @@ local function readLine()
     local r = io.stdin._handle.readLine()
     return r
 end
+
 local function readNumber()
     local r = tonumber(readLine())
     return r
 end
 
-local function getpositionFromUser()
-    print("x")
-    position["x"] = readNumber()
-    print("y")
-    position["y"] = readNumber()
-    print("z")
-    position["z"] = readNumber()
+local function getPositionFromUser()
+    print("x\ty\tz")
+    local answer = readLine()
+    local coords = getStringArr(answer)
+    position["x"] = tonumber(coords[0])
+    position["y"] = tonumber(coords[1])
+    position["z"] = tonumber(coords[2])
     print("Heading (north, west, east, south)")
     position["heading"] = readLine()
-end
-
-local function getStringArr(string)
-    local arr = {}
-    local i = 0
-    for str in string.gmatch(string, "%S+") do
-        arr[i] = str
-        i = i + 1
-    end
-    return arr
 end
 
 local function getAllItemSlots()
@@ -132,9 +133,44 @@ local function Dig(direction) --doesnt move the turtle
     end
 end
 
+local function instructionInterpeter(commands)
+    local header = commands[0]
+    if(header == "move") then
+        if commands[2] then
+            for i = 1, tonumber(commands[2]) do
+                Move(commands[1])
+            end
+        else
+            Move(commands[1])
+        end
+    elseif(header == "dig") then
+        if commands[2] then
+            for i = 1, tonumber(commands[2]) do
+                Dig(commands[1])
+            end
+        else
+            Dig(commands[1])
+        end
+    elseif(header == "tunnel") then
+        if commands[2] then
+            for i = 1, tonumber(commands[2]) do
+                Dig(commands[1])
+                Move(commands[1])
+            end
+        else
+            Dig(commands[1])
+            Move(commands[1])
+        end
+    elseif(header == "fuel") then
+        ws.send("fuel " .. turtle.getFuelLevel())
+    elseif(header == "items") then
+        getAllItemSlots()
+    end
+end
+
 if ws then
     print("> connected")
-    getpositionFromUser()
+    getPositionFromUser()
     ws.send("position " .. json.encode(position))
     while true do
         ws.send("waiting")
@@ -142,23 +178,14 @@ if ws then
         if response then
             local actions = getStringArr(response)
             local header = actions[0]
-            if(header == "move") then
-                for i = 1, tonumber(actions[2]) do
-                    Move(actions[1])
+            if(header == "instructions") then
+                local arr = string.sub(response, 13)
+                local commands = json.decode(arr)
+                for k, v in pairs (commands) do
+                    instructionInterpeter(getStringArr(v))
                 end
-            elseif(header == "dig") then
-                for i = 1, tonumber(actions[2]) do
-                    Dig(actions[1])
-                end
-            elseif(header == "fuel") then
-                ws.send("fuel " .. turtle.getFuelLevel())
-            elseif(header == "tunnel") then
-                for i = 1, tonumber(actions[2]) do
-                    Dig(actions[1])
-                    Move(actions[1])
-                end
-            elseif(header == "items") then
-                getAllItemSlots()
+            else
+                instructionInterpeter(actions)
             end
         end
     end
