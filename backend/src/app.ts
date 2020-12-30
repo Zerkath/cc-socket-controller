@@ -40,7 +40,7 @@ wss.on("connection", (ws, request) => {
           } else if (action === "items") {
             turtle.getItems();
           } else {
-            turtle.experimental();
+            turtle.excavate();
           }
         }
       );
