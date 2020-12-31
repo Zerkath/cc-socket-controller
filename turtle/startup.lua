@@ -1,8 +1,12 @@
 local json = require "json" --external dependancy https://github.com/rxi/json.lua
 local label = os.getComputerLabel()
 local pos = {
-    heading = 1 -- place turtle facing north for now
+    heading = 2 -- place turtle facing north for now
                 -- todo define direction without user input
+                -- -x = 1 west
+                -- -z = 2 north
+                -- +x = 3 east
+                -- +z = 4 south
 }
 pos["x"], pos["y"], pos["z"] = gps.locate() --starting position
 local function getStringArr(string)
@@ -18,16 +22,6 @@ end
 local ws, err = http.websocket("ws://localhost:5000/".. label)
 if err then
     print(err)
-end
-
-local function readLine()
-    local r = io.stdin._handle.readLine()
-    return r
-end
-
-local function readNumber()
-    local r = tonumber(readLine())
-    return r
 end
 
 local function getAllItemSlots()
