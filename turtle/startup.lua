@@ -10,9 +10,7 @@ pos["x"], pos["y"], pos["z"] = gps.locate() --starting position
 
 local label = os.getComputerLabel()
 local id = os.getComputerID()
-if not label then
-    label = "turtle " .. id;
-end
+if not label then label = "turtle " .. id end
 
 local function getStringArr(string)
     local arr = {}
@@ -35,7 +33,7 @@ if gps.locate() then
     turtle.forward()
     local l2 = vector.new(gps.locate())
     turtle.back()
-    local result = l2-l1
+    local result = l2 - l1
     if result.x ~= 0 then
         if result.x == -1 then pos.heading = 1 else pos.heading = 3 end
     else
@@ -49,10 +47,8 @@ local function getAllItemSlots()
     local items = {}
     for slot = 1, 16 do
         local item = turtle.getItemDetail(slot)
-        if not item then
-            item = {count = 0, name = "minecraft:air"}
-        else
-            item["damage"] = nil
+        if not item then item = {count = 0, name = "minecraft:air"}
+        else item["damage"] = nil -- override useless data
         end
         items[slot] = item
     end
@@ -76,28 +72,20 @@ local function Turn(direction)
 end
 
 local function Move(direction)
-    if direction == "forward" then
-        turtle.forward()
-    elseif direction == "back" then
-        turtle.back()
-    elseif direction == "left" or direction == "right" then
-        Turn(direction)
-    elseif direction == "up" then
-        turtle.up()
-    elseif direction == "down" then
-        turtle.down()
+    if direction == "forward"   then turtle.forward()
+    elseif direction == "back"  then turtle.back()
+    elseif direction == "up"    then turtle.up()
+    elseif direction == "down"  then turtle.down()
+    elseif direction == "left" or direction == "right" then Turn(direction)
     end
     pos["x"], pos["y"], pos["z"] = gps.locate() --update position
     ws.send("position " .. json.encode(pos))
 end
 
 local function Dig(direction) --doesnt move the turtle
-    if direction == "forward" then
-        turtle.dig()
-    elseif direction == "down" then
-        turtle.digDown()
-    elseif direction == "up" then
-        turtle.digUp()
+    if direction == "forward"   then turtle.dig()
+    elseif direction == "down"  then turtle.digDown()
+    elseif direction == "up"    then turtle.digUp()
     end
     getAllItemSlots()
 end
@@ -105,26 +93,19 @@ end
 local function instructionInterpeter(commands)
     local header = commands[0]
     local count = 1;
-    if commands[2] then -- if exists set number of commands to execute
-        count = tonumber(commands[2])
-    end
-    if(header == "move") then
-        for i = 1, count do
-            Move(commands[1])
-        end
-    elseif(header == "dig") then
-        for i = 1, count do
-            Dig(commands[1])
-        end
+
+    -- placeholder command amount is 1 get overriden if specified
+    if commands[2] then count = tonumber(commands[2]) end
+
+    if(header == "move")        then for i = 1, count do Move(commands[1]) end
+    elseif(header == "dig")     then for i = 1, count do Dig(commands[1]) end
+    elseif(header == "fuel")    then ws.send("fuel " .. turtle.getFuelLevel())
+    elseif(header == "items")   then getAllItemSlots()
     elseif(header == "tunnel") then
         for i = 1, count do
             Dig(commands[1])
             Move(commands[1])
         end
-    elseif(header == "fuel") then
-        ws.send("fuel " .. turtle.getFuelLevel())
-    elseif(header == "items") then
-        getAllItemSlots()
     end
 end
 
@@ -138,6 +119,7 @@ if ws and gps.locate() then
             local actions = getStringArr(response)
             local header = actions[0]
             if(header == "instructions") then
+                -- skips header and the rest get decoded from the json object
                 local arr = string.sub(response, 13)
                 local commands = json.decode(arr)
                 for k, v in pairs (commands) do
