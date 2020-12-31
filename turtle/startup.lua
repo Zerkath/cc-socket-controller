@@ -1,14 +1,19 @@
 local json = require "json" --external dependancy https://github.com/rxi/json.lua
-local label = os.getComputerLabel()
+
 local pos = {
-    heading = 2 -- place turtle facing north for now
-                -- todo define direction without user input
-                -- -x = 1 west
+    heading = 2 -- -x = 1 west
                 -- -z = 2 north
                 -- +x = 3 east
                 -- +z = 4 south
 }
 pos["x"], pos["y"], pos["z"] = gps.locate() --starting position
+
+local label = os.getComputerLabel()
+local id = os.getComputerID()
+if not label then
+    label = "turtle " .. id;
+end
+
 local function getStringArr(string)
     local arr = {}
     local i = 0
@@ -22,6 +27,22 @@ end
 local ws, err = http.websocket("ws://localhost:5000/".. label)
 if err then
     print(err)
+end
+
+if gps.locate() then
+    -- get orientation
+    local l1 = vector.new(gps.locate())
+    turtle.forward()
+    local l2 = vector.new(gps.locate())
+    turtle.back()
+    local result = l2-l1
+    if result.x ~= 0 then
+        if result.x == -1 then pos.heading = 1 else pos.heading = 3 end
+    else
+        if result.z == -1 then pos.heading = 2 else pos.heading = 4 end
+    end
+else
+    print("No satelite cannot triangulate position")
 end
 
 local function getAllItemSlots()
@@ -107,7 +128,7 @@ local function instructionInterpeter(commands)
     end
 end
 
-if ws then
+if ws and gps.locate() then
     print("> connected")
     ws.send("position " .. json.encode(pos))
     while true do
