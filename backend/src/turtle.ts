@@ -10,7 +10,7 @@ export class Turtle extends EventEmitter {
     x: 0,
     y: 0,
     z: 0,
-    heading: "",
+    heading: 2,
   };
   inventory: InventoryCell[] = [];
 
@@ -31,8 +31,9 @@ export class Turtle extends EventEmitter {
         this.inventory = JSON.parse(items[1]);
         console.log(this.inventory);
       } else if (items[0] === "position") {
-        this.position = JSON.parse(items[1]);
-        this.printCoords();
+        const { x, y, z, heading } = JSON.parse(items[1]);
+        this.position = { x, y, z, heading };
+        console.log(this.position);
       }
     });
   }
@@ -54,10 +55,6 @@ export class Turtle extends EventEmitter {
 
   public getItems(): void {
     this.ws.send("items");
-  }
-
-  public printCoords(): void {
-    console.log(this.position);
   }
 
   /**
