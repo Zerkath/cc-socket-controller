@@ -1,11 +1,17 @@
 local json = require "json" --external dependancy https://github.com/rxi/json.lua
-local label = os.getComputerLabel()
-local position = {
-    x = 0,
-    y = 0,
-    z = 0,
-    heading = "north"
+
+local pos = {
+    heading = 2 -- -x = 1 west
+                -- -z = 2 north
+                -- +x = 3 east
+                -- +z = 4 south
 }
+pos["x"], pos["y"], pos["z"] = gps.locate() --starting position
+
+local label = os.getComputerLabel()
+local id = os.getComputerID()
+if not label then label = "turtle " .. id end
+
 local function getStringArr(string)
     local arr = {}
     local i = 0
@@ -21,157 +27,91 @@ if err then
     print(err)
 end
 
-local function readLine()
-    local r = io.stdin._handle.readLine()
-    return r
-end
-
-local function readNumber()
-    local r = tonumber(readLine())
-    return r
-end
-
-local function getPositionFromUser()
-    print("x\ty\tz")
-    local answer = readLine()
-    local coords = getStringArr(answer)
-    position["x"] = tonumber(coords[0])
-    position["y"] = tonumber(coords[1])
-    position["z"] = tonumber(coords[2])
-    print("Heading (north, west, east, south)")
-    position["heading"] = readLine()
+if gps.locate() then
+    -- get orientation
+    local l1 = vector.new(gps.locate())
+    turtle.forward()
+    local l2 = vector.new(gps.locate())
+    turtle.back()
+    local result = l2 - l1
+    if result.x ~= 0 then
+        if result.x == -1 then pos.heading = 1 else pos.heading = 3 end
+    else
+        if result.z == -1 then pos.heading = 2 else pos.heading = 4 end
+    end
+else
+    print("No satelite cannot triangulate position")
 end
 
 local function getAllItemSlots()
     local items = {}
     for slot = 1, 16 do
         local item = turtle.getItemDetail(slot)
-        if not item then
-            item = {count = 0, name = "minecraft:air"}
-        else
-            item["damage"] = nil
+        if not item then item = {count = 0, name = "minecraft:air"}
+        else item["damage"] = nil -- override useless data
         end
         items[slot] = item
     end
     ws.send("items " .. json.encode(items))
 end
 
--- todo clean this method up
-local function Move(direction)
-    local heading = position["heading"]
-    if direction == "forward" then
-        if turtle.forward() then
-            if heading == "north" then
-                position["z"] = position["z"] - 1
-            elseif heading == "east" then
-                position["x"] = position["x"] + 1
-            elseif heading == "south" then
-                position["z"] = position["z"] + 1
-            elseif heading == "west" then
-                position["x"] = position["x"] - 1
-            else
-                turtle.back() --invalid direction lets go back
-            end
-        end
-    elseif direction == "back" then
-        if turtle.back() then
-            if heading == "north" then
-                position["z"] = position["z"] + 1
-            elseif heading == "east" then
-                position["x"] = position["x"] - 1
-            elseif heading == "south" then
-                position["z"] = position["z"] - 1
-            elseif heading == "west" then
-                position["x"] = position["x"] + 1
-            else
-                turtle.forward() --invalid direction lets go back
-            end
-        end
-    elseif direction == "left" then
+local function Turn(direction)
+    local nH = pos["heading"]
+    if direction == "left" then
         if turtle.turnLeft() then
-            if heading == "north" then
-                position["heading"] = "west"
-            elseif heading == "west" then
-                position["heading"] = "south"
-            elseif heading == "south" then
-                position["heading"] = "east"
-            elseif heading == "east" then
-                position["heading"] = "north"
-            end
+            nH = nH - 1
+            if nH < 1 then nH = nH + 4 end
         end
     elseif direction == "right" then
         if turtle.turnRight() then
-            if heading == "north" then
-                position["heading"] = "east"
-            elseif heading == "east" then
-                position["heading"] = "south"
-            elseif heading == "south" then
-                position["heading"] = "west"
-            elseif heading == "west" then
-                position["heading"] = "north"
-            end
-        end
-    elseif direction == "up" then
-        if turtle.up() then
-            position["y"] = position["y"] + 1
-        end
-    elseif direction == "down" then
-        if turtle.down() then
-            position["y"] = position["y"] - 1
+            nH = nH + 1
+            if nH > 4 then nH = nH - 4 end
         end
     end
-    ws.send("position " .. json.encode(position))
+    pos["heading"] = nH
+end
+
+local function Move(direction)
+    if direction == "forward"   then turtle.forward()
+    elseif direction == "back"  then turtle.back()
+    elseif direction == "up"    then turtle.up()
+    elseif direction == "down"  then turtle.down()
+    elseif direction == "left" or direction == "right" then Turn(direction)
+    end
+    pos["x"], pos["y"], pos["z"] = gps.locate() --update position
+    ws.send("position " .. json.encode(pos))
 end
 
 local function Dig(direction) --doesnt move the turtle
-    if direction == "forward" then
-        turtle.dig()
-    elseif direction == "down" then
-        turtle.digDown()
-    elseif direction == "up" then
-        turtle.digUp()
+    if direction == "forward"   then turtle.dig()
+    elseif direction == "down"  then turtle.digDown()
+    elseif direction == "up"    then turtle.digUp()
     end
+    getAllItemSlots()
 end
 
 local function instructionInterpeter(commands)
     local header = commands[0]
-    if(header == "move") then
-        if commands[2] then
-            for i = 1, tonumber(commands[2]) do
-                Move(commands[1])
-            end
-        else
-            Move(commands[1])
-        end
-    elseif(header == "dig") then
-        if commands[2] then
-            for i = 1, tonumber(commands[2]) do
-                Dig(commands[1])
-            end
-        else
-            Dig(commands[1])
-        end
+    local count = 1;
+
+    -- placeholder command amount is 1 get overriden if specified
+    if commands[2] then count = tonumber(commands[2]) end
+
+    if(header == "move")        then for i = 1, count do Move(commands[1]) end
+    elseif(header == "dig")     then for i = 1, count do Dig(commands[1]) end
+    elseif(header == "fuel")    then ws.send("fuel " .. turtle.getFuelLevel())
+    elseif(header == "items")   then getAllItemSlots()
     elseif(header == "tunnel") then
-        if commands[2] then
-            for i = 1, tonumber(commands[2]) do
-                Dig(commands[1])
-                Move(commands[1])
-            end
-        else
+        for i = 1, count do
             Dig(commands[1])
             Move(commands[1])
         end
-    elseif(header == "fuel") then
-        ws.send("fuel " .. turtle.getFuelLevel())
-    elseif(header == "items") then
-        getAllItemSlots()
     end
 end
 
-if ws then
+if ws and gps.locate() then
     print("> connected")
-    getPositionFromUser()
-    ws.send("position " .. json.encode(position))
+    ws.send("position " .. json.encode(pos))
     while true do
         ws.send("waiting")
         local response = ws.receive()
@@ -179,6 +119,7 @@ if ws then
             local actions = getStringArr(response)
             local header = actions[0]
             if(header == "instructions") then
+                -- skips header and the rest get decoded from the json object
                 local arr = string.sub(response, 13)
                 local commands = json.decode(arr)
                 for k, v in pairs (commands) do
