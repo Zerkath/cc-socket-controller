@@ -10,7 +10,7 @@ export class Turtle extends EventEmitter {
     x: 0,
     y: 0,
     z: 0,
-    heading: "",
+    heading: 2,
   };
   inventory: InventoryCell[] = [];
 
@@ -31,8 +31,9 @@ export class Turtle extends EventEmitter {
         this.inventory = JSON.parse(items[1]);
         console.log(this.inventory);
       } else if (items[0] === "position") {
-        this.position = JSON.parse(items[1]);
-        this.printCoords();
+        const { x, y, z, heading } = JSON.parse(items[1]);
+        this.position = { x, y, z, heading };
+        console.log(this.position);
       }
     });
   }
@@ -56,36 +57,26 @@ export class Turtle extends EventEmitter {
     this.ws.send("items");
   }
 
-  public printCoords(): void {
-    console.log(this.position);
-  }
-
-  // This should dig a 4x4 grid then go down a level.
-  public experimental(): void {
+  /**
+   * This method excavates a 4x4 area then goes down by one
+   */
+  public excavate(): void {
     const data = [
-      tunnel.forward,
-      tunnel.forward,
-      tunnel.forward,
+      tunnel.forward + " 3",
       move.right,
-      tunnel.forward,
-      tunnel.forward,
-      tunnel.forward,
+      tunnel.forward + " 3",
       move.right,
       tunnel.forward,
       move.right,
-      tunnel.forward,
-      tunnel.forward,
+      tunnel.forward + " 2",
       move.left,
       tunnel.forward,
       move.left,
-      tunnel.forward,
-      tunnel.forward,
+      tunnel.forward + " 2",
       move.right,
       tunnel.forward,
       move.right,
-      tunnel.forward,
-      tunnel.forward,
-      tunnel.forward,
+      tunnel.forward + " 3",
       tunnel.down,
       move.right,
     ];
