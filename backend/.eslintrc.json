@@ -17,5 +17,7 @@
     "ecmaVersion": 12
   },
   "plugins": ["react", "@typescript-eslint"],
-  "rules": {}
+  "rules": {
+    "camelcase": [2, { "properties": "always" }]
+  }
 }

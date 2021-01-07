@@ -1,11 +1,14 @@
 import WebSocket from "ws";
 import { EventEmitter } from "events";
-import { move, dig, tunnel, InventoryCell } from "./turtle_attributes";
+import { move, dig, tunnel, InventoryCell } from "./turtleAttributes";
 
 export class Turtle extends EventEmitter {
   ws: WebSocket;
   fuelLevel = 0;
   label: string;
+  /**
+   * heading 1, 2, 3 and 4 correspond to west, north, east and west
+   */
   position = {
     x: 0,
     y: 0,
